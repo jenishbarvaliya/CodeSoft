@@ -7,19 +7,11 @@ class Task:
     def __init__(self, description, priority='Medium', due_date=None, category=None, status='Pending'):
         self.description = description
         self.priority = priority
-        self.due_date = self.parse_date(due_date)
+        self.due_date = due_date
         self.category = category
         self.status = status
-        self.created_at = datetime.now()
+        self.created_at = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
-    def parse_date(self, date_str):
-        if date_str:
-            try:
-                return datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
-            except ValueError:
-                return None
-        return None
-    
     def to_dict(self):
         return {
             'description': self.description,
@@ -27,7 +19,7 @@ class Task:
             'due_date': self.due_date,
             'category': self.category,
             'status': self.status,
-            'created_at': self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            'created_at': self.created_at
         }
 
 class ToDoList:
@@ -56,7 +48,7 @@ class ToDoList:
         VALUES (?, ?, ?, ?, ?, ?)
         """
         self.conn.execute(query, (
-            task.description, task.priority, task.due_date, task.category, task.status, task.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            task.description, task.priority, task.due_date, task.category, task.status, task.created_at
         ))
         self.conn.commit()
 
@@ -137,7 +129,7 @@ def show_task_details():
             details = (
                 f"Description: {task[1]}\n"
                 f"Priority: {task[2]}\n"
-                f"Due Date: {datetime.strptime(task[3], '%Y-%m-%d').strftime('%d-%m-%Y') if task[3] else 'N/A'}\n"
+                f"Due Date: {task[3] if task[3] else 'N/A'}\n"
                 f"Category: {task[4]}\n"
                 f"Status: {task[5]}\n"
                 f"Created At: {task[6]}"
@@ -155,7 +147,7 @@ def update_listbox(status=None):
     for task in tasks:
         task_display = (
             f"{task[0]} - {task[1]} - {task[2]} - "
-            f"{datetime.strptime(task[3], '%Y-%m-%d').strftime('%d-%m-%Y') if task[3] else 'N/A'} - "
+            f"{task[3] if task[3] else 'N/A'} - "
             f"{task[4]} - {task[5]} - {task[6]}"
         )
         listbox.insert(tk.END, task_display)
@@ -180,7 +172,7 @@ entry_description = tk.Entry(input_frame, width=50)
 entry_description.pack(side=tk.LEFT, padx=10)
 
 tk.Label(input_frame, text="Priority:").pack(side=tk.LEFT, padx=5)
-priority_combobox = ttk.Combobox(input_frame, values=["Low", "Medium", "High"], width=10)
+priority_combobox = ttk.Combobox(input_frame, values=["Low", "Medium", "High"], width=10, state="readonly")
 priority_combobox.set("Medium")
 priority_combobox.pack(side=tk.LEFT, padx=5)
 
